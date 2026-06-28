@@ -28,15 +28,18 @@ app.use(express.urlencoded({ extended: true }));
 // 1. Rute API utama Anda (Biarkan tetap di atas)
 app.use("/api", router);
 
-// 2. Melayani file statis hasil build frontend (HTML, CSS, JS)
-app.use(express.static(path.join(process.cwd(), "frontend/dist")));
+const frontendPath = path.resolve(process.cwd(), "../frontend/dist");
 
-// 3. ALTERNATIF TOTAL: Middleware Fungsi Tangkap-Semua (Kebal PathError Express 5)
+console.log("Frontend path:", frontendPath);
+
+app.use(express.static(frontendPath));
+
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return next();
   }
-  res.sendFile(path.join(process.cwd(), "frontend/dist", "index.html"));
+
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 export default app;
