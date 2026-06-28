@@ -36,8 +36,8 @@ app.use("/api", router);
 // 2. Melayani file statis hasil build frontend (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-// 3. PERBAIKAN DI SINI: Menggunakan (.*) untuk Express 5 catch-all route
-app.get("(.*)", (req, res) => {
+// 3. PERBAIKAN FINAL EXPRESS 5: Menggunakan parameter bernama /:splat*
+app.get("/:splat*", (req, res) => {
   res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
 });
 
