@@ -33,12 +33,11 @@ app.use(express.urlencoded({ extended: true }));
 // 1. Rute API utama Anda (Biarkan tetap di atas)
 app.use("/api", router);
 
-// 2. Tambahkan ini untuk melayani file statis hasil build frontend (HTML, CSS, JS)
-// Jalur ini keluar dari backend/src (atau backend/dist) ke root, lalu masuk ke folder frontend/dist
+// 2. Melayani file statis hasil build frontend (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-// 3. Tambahkan catch-all route agar semua rute navigasi diarahkan ke index.html frontend
-app.get("*", (req, res) => {
+// 3. PERBAIKAN DI SINI: Menggunakan (.*) untuk Express 5 catch-all route
+app.get("(.*)", (req, res) => {
   res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
 });
 
