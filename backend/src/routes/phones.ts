@@ -26,15 +26,43 @@ const fmt = (p: any) => ({
 router.get("/phones", async (req, res) => {
   try {
     const { status, store_id, search } = req.query as Record<string, string>;
-    let rows = await withJoins().orderBy(phonesTable.created_at);
-    if (status && status !== "all") rows = rows.filter(r => r.status === status);
-    if (store_id) rows = rows.filter(r => r.store_id === parseInt(store_id));
+
+    let rows = await withJoins();
+
+    // urutkan manual
+    rows = rows.sort((a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
+    );
+
+    if (status && status !== "all") {
+      rows = rows.filter(r => r.status === status);
+    }
+
+    if (store_id) {
+      rows = rows.filter(r => r.store_id === parseInt(store_id));
+    }
+
     if (search) {
       const s = search.toLowerCase();
-      rows = rows.filter(r => r.imei.toLowerCase().includes(s) || r.brand.toLowerCase().includes(s) || r.model.toLowerCase().includes(s));
+
+      rows = rows.filter(r =>
+        (r.imei || "").toLowerCase().includes(s) ||
+        (r.brand || "").toLowerCase().includes(s) ||
+        (r.model || "").toLowerCase().includes(s)
+      );
     }
+
     res.json(rows.map(fmt));
-  } catch { res.status(500).json({ error: "Internal server error" }); }
+
+  } catch (err) {
+    console.error("PHONES ERROR:", err);
+
+    res.status(500).json({
+      error: "Internal server error",
+      detail: String(err)
+    });
+  }
 });
 
 router.post("/phones", async (req, res) => {
