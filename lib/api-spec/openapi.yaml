@@ -1,0 +1,751 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: HPStinger - Sistem Pembukuan HP
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: stores
+    description: Store management
+  - name: staff
+    description: Staff management
+  - name: phones
+    description: Phone inventory
+  - name: sales
+    description: Sales management
+  - name: dashboard
+    description: Dashboard & analytics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /stores:
+    get:
+      operationId: listStores
+      tags: [stores]
+      summary: List all stores
+      responses:
+        "200":
+          description: List of stores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Store"
+    post:
+      operationId: createStore
+      tags: [stores]
+      summary: Create a new store
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoreInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Store"
+
+  /stores/{id}:
+    get:
+      operationId: getStore
+      tags: [stores]
+      summary: Get store by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Store found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Store"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateStore
+      tags: [stores]
+      summary: Update store
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoreUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Store"
+
+  /staff:
+    get:
+      operationId: listStaff
+      tags: [staff]
+      summary: List all staff
+      parameters:
+        - name: store_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Staff"
+    post:
+      operationId: createStaff
+      tags: [staff]
+      summary: Create staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Staff"
+
+  /staff/{id}:
+    patch:
+      operationId: updateStaff
+      tags: [staff]
+      summary: Update staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Staff"
+    delete:
+      operationId: deleteStaff
+      tags: [staff]
+      summary: Delete staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /phones:
+    get:
+      operationId: listPhones
+      tags: [phones]
+      summary: List phones
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [in_stock, sold, all]
+        - name: store_id
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of phones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Phone"
+    post:
+      operationId: createPhone
+      tags: [phones]
+      summary: Input new phone via IMEI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Phone"
+
+  /phones/by-imei/{imei}:
+    get:
+      operationId: getPhoneByImei
+      tags: [phones]
+      summary: Lookup phone by IMEI (for scan)
+      parameters:
+        - name: imei
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Phone found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Phone"
+        "404":
+          description: Not found
+
+  /phones/{id}:
+    get:
+      operationId: getPhone
+      tags: [phones]
+      summary: Get phone by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Phone found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Phone"
+    patch:
+      operationId: updatePhone
+      tags: [phones]
+      summary: Update phone data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Phone"
+    delete:
+      operationId: deletePhone
+      tags: [phones]
+      summary: Delete phone
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /sales:
+    get:
+      operationId: listSales
+      tags: [sales]
+      summary: List all sales
+      parameters:
+        - name: store_id
+          in: query
+          schema:
+            type: integer
+        - name: staff_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+    post:
+      operationId: createSale
+      tags: [sales]
+      summary: Create a sale (scan IMEI, capture customer photo)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaleInput"
+      responses:
+        "201":
+          description: Sale created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+
+  /sales/{id}:
+    get:
+      operationId: getSale
+      tags: [sales]
+      summary: Get sale detail with warranty info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sale found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaleDetail"
+
+  /warranties:
+    get:
+      operationId: listWarranties
+      tags: [sales]
+      summary: List active warranties
+      parameters:
+        - name: store_id
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of warranties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Warranty"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Dashboard statistics
+      parameters:
+        - name: store_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Store:
+      type: object
+      required: [id, name, slug, created_at]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    StoreInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        logo_url:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+
+    StoreUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        logo_url:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+
+    Staff:
+      type: object
+      required: [id, name, role, store_id, created_at]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+        store_id:
+          type: integer
+        store_name:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    StaffInput:
+      type: object
+      required: [name, role, store_id]
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        store_id:
+          type: integer
+
+    StaffUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        store_id:
+          type: integer
+
+    Phone:
+      type: object
+      required: [id, imei, brand, model, status, selling_price, warranty_months, store_id, input_staff_id, created_at]
+      properties:
+        id:
+          type: integer
+        imei:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        color:
+          type: ["string", "null"]
+        storage:
+          type: ["string", "null"]
+        purchase_price:
+          type: number
+        selling_price:
+          type: number
+        warranty_months:
+          type: integer
+        status:
+          type: string
+          enum: [in_stock, sold]
+        store_id:
+          type: integer
+        store_name:
+          type: ["string", "null"]
+        input_staff_id:
+          type: integer
+        input_staff_name:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    PhoneInput:
+      type: object
+      required: [imei, brand, model, selling_price, warranty_months, store_id, input_staff_id]
+      properties:
+        imei:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        color:
+          type: string
+        storage:
+          type: string
+        purchase_price:
+          type: number
+        selling_price:
+          type: number
+        warranty_months:
+          type: integer
+        store_id:
+          type: integer
+        input_staff_id:
+          type: integer
+
+    PhoneUpdate:
+      type: object
+      properties:
+        brand:
+          type: string
+        model:
+          type: string
+        color:
+          type: string
+        storage:
+          type: string
+        purchase_price:
+          type: number
+        selling_price:
+          type: number
+        warranty_months:
+          type: integer
+
+    Sale:
+      type: object
+      required: [id, phone_id, phone_imei, customer_name, sale_price, fee_amount, sale_staff_id, store_id, created_at]
+      properties:
+        id:
+          type: integer
+        phone_id:
+          type: integer
+        phone_imei:
+          type: string
+        phone_brand:
+          type: ["string", "null"]
+        phone_model:
+          type: ["string", "null"]
+        customer_name:
+          type: string
+        customer_phone:
+          type: ["string", "null"]
+        sale_price:
+          type: number
+        fee_amount:
+          type: number
+        sale_staff_id:
+          type: integer
+        sale_staff_name:
+          type: ["string", "null"]
+        store_id:
+          type: integer
+        store_name:
+          type: ["string", "null"]
+        customer_photo:
+          type: ["string", "null"]
+        warranty_expires_at:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    SaleInput:
+      type: object
+      required: [phone_imei, customer_name, sale_price, fee_amount, sale_staff_id, store_id]
+      properties:
+        phone_imei:
+          type: string
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        sale_price:
+          type: number
+        fee_amount:
+          type: number
+        sale_staff_id:
+          type: integer
+        store_id:
+          type: integer
+        customer_photo:
+          type: string
+
+    SaleDetail:
+      type: object
+      required: [id, phone_id, phone_imei, customer_name, sale_price, fee_amount, sale_staff_id, store_id, created_at]
+      properties:
+        id:
+          type: integer
+        phone_id:
+          type: integer
+        phone_imei:
+          type: string
+        phone_brand:
+          type: ["string", "null"]
+        phone_model:
+          type: ["string", "null"]
+        phone_color:
+          type: ["string", "null"]
+        phone_storage:
+          type: ["string", "null"]
+        customer_name:
+          type: string
+        customer_phone:
+          type: ["string", "null"]
+        sale_price:
+          type: number
+        fee_amount:
+          type: number
+        sale_staff_id:
+          type: integer
+        sale_staff_name:
+          type: ["string", "null"]
+        store_id:
+          type: integer
+        store_name:
+          type: ["string", "null"]
+        customer_photo:
+          type: ["string", "null"]
+        warranty_months:
+          type: integer
+        warranty_expires_at:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    Warranty:
+      type: object
+      required: [sale_id, phone_imei, customer_name, warranty_expires_at, store_id, created_at]
+      properties:
+        sale_id:
+          type: integer
+        phone_id:
+          type: integer
+        phone_imei:
+          type: string
+        phone_brand:
+          type: ["string", "null"]
+        phone_model:
+          type: ["string", "null"]
+        customer_name:
+          type: string
+        customer_phone:
+          type: ["string", "null"]
+        warranty_months:
+          type: integer
+        warranty_expires_at:
+          type: string
+        days_remaining:
+          type: integer
+        store_id:
+          type: integer
+        store_name:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [total_phones, phones_in_stock, phones_sold, total_sales_revenue, total_fees, total_staff, total_stores]
+      properties:
+        total_phones:
+          type: integer
+        phones_in_stock:
+          type: integer
+        phones_sold:
+          type: integer
+        total_sales_revenue:
+          type: number
+        total_fees:
+          type: number
+        total_staff:
+          type: integer
+        total_stores:
+          type: integer
+        recent_sales:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sale"
+        top_brands:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandCount"
+
+    BrandCount:
+      type: object
+      required: [brand, count]
+      properties:
+        brand:
+          type: string
+        count:
+          type: integer
