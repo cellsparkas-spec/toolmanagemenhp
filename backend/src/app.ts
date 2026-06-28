@@ -28,15 +28,16 @@ app.use(express.urlencoded({ extended: true }));
 // 1. Rute API utama Anda (Biarkan tetap di atas)
 app.use("/api", router);
 
-const frontendPath = path.resolve(process.cwd(), "../frontend/dist");
+console.log("Current directory:", process.cwd());
+const frontendPath = path.join(process.cwd(), "frontend", "dist");
 
 console.log("Frontend path:", frontendPath);
 
 app.use(express.static(frontendPath));
 
-app.use((req, res, next) => {
+app.get("*", (req, res) => {
   if (req.path.startsWith("/api")) {
-    return next();
+    return res.status(404).json({ message: "API route not found" });
   }
 
   res.sendFile(path.join(frontendPath, "index.html"));
