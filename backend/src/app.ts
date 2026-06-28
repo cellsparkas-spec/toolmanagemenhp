@@ -31,7 +31,7 @@ app.use("/api", router);
 // 2. Melayani file statis hasil build frontend (HTML, CSS, JS)
 app.use(express.static(path.join(process.cwd(), "frontend/dist")));
 
-// 3. Fungsi Middleware Catch-All (Aman dari pembatasan Regex Express 5)
+// 3. ALTERNATIF TOTAL: Middleware Fungsi Tangkap-Semua (Kebal PathError Express 5)
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return next();
